@@ -26,6 +26,10 @@
   scrollbar-color: #1a1a3e #050510;
 }
 
+html {
+  background-color: #050510;
+}
+
 body {
   background: var(--color-background);
   color: var(--color-foreground);
