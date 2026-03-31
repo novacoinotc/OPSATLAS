@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { StatsCards } from "@/components/dashboard/stats-cards";
 import { PaymentsChart } from "@/components/dashboard/payments-chart";
 import { PaymentsTable } from "@/components/dashboard/payments-table";
 import { PaymentFiltersBar } from "@/components/dashboard/payment-filters";
 import { PaymentDetailModal } from "@/components/dashboard/payment-detail-modal";
-import { RefreshCw, Download } from "lucide-react";
+import { RefreshCw, Download, Wallet } from "lucide-react";
+import { formatClabe, getCompanyFromClabe } from "@/lib/utils";
 
 interface Payment {
   id: string;
@@ -48,7 +50,10 @@ interface Filters {
   maxAmount: string;
 }
 
-export default function DashboardPage() {
+function DashboardContent() {
+  const searchParams = useSearchParams();
+  const clabeFilter = searchParams.get("clabe") || "";
+
   const [stats, setStats] = useState<Stats | null>(null);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [pagination, setPagination] = useState<Pagination>({
@@ -88,6 +93,7 @@ export default function DashboardPage() {
       if (filters.dateTo) params.set("dateTo", filters.dateTo);
       if (filters.minAmount) params.set("minAmount", filters.minAmount);
       if (filters.maxAmount) params.set("maxAmount", filters.maxAmount);
+      if (clabeFilter) params.set("clabe", clabeFilter);
 
       const res = await fetch(`/api/payments?${params}`);
       if (res.ok) {
@@ -96,10 +102,11 @@ export default function DashboardPage() {
         setPagination(data.pagination);
       }
     },
-    [filters]
+    [filters, clabeFilter]
   );
 
   useEffect(() => {
+    setLoading(true);
     Promise.all([fetchStats(), fetchPayments()]).finally(() =>
       setLoading(false)
     );
@@ -116,6 +123,7 @@ export default function DashboardPage() {
     if (filters.company) params.set("company", filters.company);
     if (filters.dateFrom) params.set("dateFrom", filters.dateFrom);
     if (filters.dateTo) params.set("dateTo", filters.dateTo);
+    if (clabeFilter) params.set("clabe", clabeFilter);
     window.open(`/api/payments/export?${params}`, "_blank");
   }
 
@@ -135,10 +143,33 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Dashboard</h1>
-          <p className="text-muted text-sm mt-1">
-            Monitoreo de pagos SPEI en tiempo real
-          </p>
+          {clabeFilter ? (
+            <>
+              <div className="flex items-center gap-2 mb-1">
+                <Wallet className="w-5 h-5 text-accent-light" />
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                  getCompanyFromClabe(clabeFilter) === "Gamingo"
+                    ? "bg-accent/15 text-accent-light"
+                    : "bg-accent-blue/15 text-accent-blue-light"
+                }`}>
+                  {getCompanyFromClabe(clabeFilter)}
+                </span>
+              </div>
+              <h1 className="text-2xl font-bold font-mono">
+                {formatClabe(clabeFilter)}
+              </h1>
+              <p className="text-muted text-sm mt-1">
+                Pagos recibidos en esta cuenta
+              </p>
+            </>
+          ) : (
+            <>
+              <h1 className="text-2xl font-bold">Dashboard</h1>
+              <p className="text-muted text-sm mt-1">
+                Monitoreo de pagos SPEI en tiempo real
+              </p>
+            </>
+          )}
         </div>
         <div className="flex items-center gap-2 sm:gap-3">
           <button
@@ -161,11 +192,11 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Stats */}
-      {stats && <StatsCards stats={stats} />}
+      {/* Stats - only show full stats on main dashboard */}
+      {!clabeFilter && stats && <StatsCards stats={stats} />}
 
       {/* Chart */}
-      {stats && stats.dailyChart.length > 0 && (
+      {!clabeFilter && stats && stats.dailyChart.length > 0 && (
         <PaymentsChart data={stats.dailyChart} />
       )}
 
@@ -194,5 +225,19 @@ export default function DashboardPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center h-96">
+          <div className="w-12 h-12 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <DashboardContent />
+    </Suspense>
   );
 }

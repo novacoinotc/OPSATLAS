@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
   const dateTo = searchParams.get("dateTo") || "";
   const minAmount = searchParams.get("minAmount") || "";
   const maxAmount = searchParams.get("maxAmount") || "";
+  const clabe = searchParams.get("clabe") || "";
   const page = parseInt(searchParams.get("page") || "1");
   const limit = parseInt(searchParams.get("limit") || "25");
   const skip = (page - 1) * limit;
@@ -34,6 +35,10 @@ export async function GET(request: NextRequest) {
 
   if (company) {
     where.company = company;
+  }
+
+  if (clabe) {
+    where.beneficiaryAccount = clabe;
   }
 
   if (dateFrom || dateTo) {

@@ -5,15 +5,16 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { signOut } from "next-auth/react";
 import {
   LayoutDashboard,
-  Receipt,
   Users,
   LogOut,
   Shield,
   ChevronRight,
   Menu,
   X,
+  Wallet,
+  ChevronDown,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, getCompanyFromClabe } from "@/lib/utils";
 import { useState, Suspense } from "react";
 
 interface SidebarProps {
@@ -24,26 +25,39 @@ interface SidebarProps {
   };
 }
 
-const navItems = [
-  {
-    label: "Dashboard",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    label: "Usuarios",
-    href: "/users",
-    icon: Users,
-    adminOnly: true,
-  },
+const GAMINGO_CLABES = [
+  "684180327012000020",
+  "684180327012000033",
+  "684180327012000046",
+  "684180327012000059",
+  "684180327012000062",
+  "684180327012000075",
+  "684180327012000088",
+  "684180327012000091",
+  "684180327012000101",
+  "684180327012000114",
+];
+
+const OASAT_CLABES = [
+  "684180327011000021",
+  "684180327011000034",
+  "684180327011000047",
+  "684180327011000050",
+  "684180327011000063",
+  "684180327011000076",
+  "684180327011000089",
+  "684180327011000092",
+  "684180327011000102",
+  "684180327011000115",
 ];
 
 function SidebarContent({ user }: SidebarProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [clabesOpen, setClabesOpen] = useState(false);
 
-  const currentTab = searchParams.get("tab");
+  const currentClabe = searchParams.get("clabe");
 
   const content = (
     <>
@@ -71,31 +85,116 @@ function SidebarContent({ user }: SidebarProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-1">
-        {navItems.map((item) => {
-          if (item.adminOnly && user.role !== "ADMIN") return null;
+      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+        {/* Dashboard */}
+        <Link
+          href="/dashboard"
+          onClick={() => setMobileOpen(false)}
+          className={cn(
+            "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200",
+            pathname === "/dashboard" && !currentClabe
+              ? "bg-accent/10 text-accent-light border border-accent/20"
+              : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+          )}
+        >
+          <LayoutDashboard className="w-4 h-4" />
+          Dashboard
+          {pathname === "/dashboard" && !currentClabe && (
+            <ChevronRight className="w-3 h-3 ml-auto" />
+          )}
+        </Link>
 
-          const isActive =
-            pathname === item.href && !currentTab;
+        {/* Cuentas CLABE */}
+        <button
+          onClick={() => setClabesOpen(!clabesOpen)}
+          className={cn(
+            "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 w-full",
+            currentClabe
+              ? "bg-accent/10 text-accent-light border border-accent/20"
+              : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+          )}
+        >
+          <Wallet className="w-4 h-4" />
+          Cuentas CLABE
+          <ChevronDown
+            className={cn(
+              "w-3 h-3 ml-auto transition-transform",
+              clabesOpen && "rotate-180"
+            )}
+          />
+        </button>
 
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setMobileOpen(false)}
-              className={cn(
-                "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200",
-                isActive
-                  ? "bg-accent/10 text-accent-light border border-accent/20"
-                  : "text-muted-foreground hover:text-foreground hover:bg-white/5"
-              )}
-            >
-              <item.icon className="w-4 h-4" />
-              {item.label}
-              {isActive && <ChevronRight className="w-3 h-3 ml-auto" />}
-            </Link>
-          );
-        })}
+        {clabesOpen && (
+          <div className="ml-2 space-y-0.5 fade-in">
+            {/* Gamingo */}
+            <p className="px-4 py-1.5 text-[10px] font-semibold text-accent-light uppercase tracking-wider">
+              Gamingo
+            </p>
+            {GAMINGO_CLABES.map((clabe) => (
+              <Link
+                key={clabe}
+                href={`/dashboard?clabe=${clabe}`}
+                onClick={() => setMobileOpen(false)}
+                className={cn(
+                  "flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-mono transition-all",
+                  currentClabe === clabe
+                    ? "bg-accent/10 text-accent-light"
+                    : "text-muted hover:text-muted-foreground hover:bg-white/5"
+                )}
+              >
+                <span className={cn(
+                  "w-1.5 h-1.5 rounded-full shrink-0",
+                  currentClabe === clabe ? "bg-accent-light" : "bg-muted/50"
+                )} />
+                ...{clabe.slice(-6)}
+              </Link>
+            ))}
+
+            {/* Oasat */}
+            <p className="px-4 py-1.5 text-[10px] font-semibold text-accent-blue-light uppercase tracking-wider mt-2">
+              Oasat
+            </p>
+            {OASAT_CLABES.map((clabe) => (
+              <Link
+                key={clabe}
+                href={`/dashboard?clabe=${clabe}`}
+                onClick={() => setMobileOpen(false)}
+                className={cn(
+                  "flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-mono transition-all",
+                  currentClabe === clabe
+                    ? "bg-accent-blue/10 text-accent-blue-light"
+                    : "text-muted hover:text-muted-foreground hover:bg-white/5"
+                )}
+              >
+                <span className={cn(
+                  "w-1.5 h-1.5 rounded-full shrink-0",
+                  currentClabe === clabe ? "bg-accent-blue-light" : "bg-muted/50"
+                )} />
+                ...{clabe.slice(-6)}
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {/* Usuarios */}
+        {user.role === "ADMIN" && (
+          <Link
+            href="/users"
+            onClick={() => setMobileOpen(false)}
+            className={cn(
+              "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200",
+              pathname === "/users"
+                ? "bg-accent/10 text-accent-light border border-accent/20"
+                : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+            )}
+          >
+            <Users className="w-4 h-4" />
+            Usuarios
+            {pathname === "/users" && (
+              <ChevronRight className="w-3 h-3 ml-auto" />
+            )}
+          </Link>
+        )}
       </nav>
 
       {/* User info */}

@@ -14,10 +14,12 @@ export async function GET(request: NextRequest) {
   const company = searchParams.get("company") || "";
   const dateFrom = searchParams.get("dateFrom") || "";
   const dateTo = searchParams.get("dateTo") || "";
+  const clabe = searchParams.get("clabe") || "";
 
   const where: Prisma.PaymentWhereInput = {};
 
   if (company) where.company = company;
+  if (clabe) where.beneficiaryAccount = clabe;
   if (dateFrom || dateTo) {
     where.receivedTimestamp = {};
     if (dateFrom) where.receivedTimestamp.gte = new Date(dateFrom);

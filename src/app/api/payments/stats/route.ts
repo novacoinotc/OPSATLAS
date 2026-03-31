@@ -23,6 +23,7 @@ export async function GET() {
     byCompany,
     recentPayments,
     dailyChart,
+    byClabeData,
   ] = await Promise.all([
     prisma.payment.count(),
     prisma.payment.count({
@@ -52,14 +53,20 @@ export async function GET() {
     // Last 30 days daily totals
     prisma.$queryRaw`
       SELECT
-        DATE(p."receivedTimestamp") as date,
+        TO_CHAR(DATE(p."receivedTimestamp" AT TIME ZONE 'America/Mexico_City'), 'YYYY-MM-DD') as date,
         SUM(p.amount) as total,
         COUNT(*)::int as count
       FROM payments p
       WHERE p."receivedTimestamp" >= ${new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30)}
-      GROUP BY DATE(p."receivedTimestamp")
+      GROUP BY DATE(p."receivedTimestamp" AT TIME ZONE 'America/Mexico_City')
       ORDER BY date ASC
     `,
+    // CLABE account summaries
+    prisma.payment.groupBy({
+      by: ["beneficiaryAccount"],
+      _sum: { amount: true },
+      _count: true,
+    }),
   ]);
 
   return NextResponse.json({
@@ -75,5 +82,10 @@ export async function GET() {
     })),
     recentPayments,
     dailyChart,
+    byClabe: (byClabeData as { beneficiaryAccount: string; _sum: { amount: number | null }; _count: number }[]).map((c) => ({
+      clabe: c.beneficiaryAccount,
+      total: c._sum.amount || 0,
+      count: c._count,
+    })),
   });
 }
