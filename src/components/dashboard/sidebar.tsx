@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { signOut } from "next-auth/react";
 import {
   LayoutDashboard,
@@ -14,7 +14,7 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 
 interface SidebarProps {
   user: {
@@ -31,11 +31,6 @@ const navItems = [
     icon: LayoutDashboard,
   },
   {
-    label: "Pagos",
-    href: "/dashboard?tab=payments",
-    icon: Receipt,
-  },
-  {
     label: "Usuarios",
     href: "/users",
     icon: Users,
@@ -43,11 +38,14 @@ const navItems = [
   },
 ];
 
-export function Sidebar({ user }: SidebarProps) {
+function SidebarContent({ user }: SidebarProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const sidebarContent = (
+  const currentTab = searchParams.get("tab");
+
+  const content = (
     <>
       {/* Logo */}
       <div className="p-6 border-b border-border">
@@ -63,7 +61,6 @@ export function Sidebar({ user }: SidebarProps) {
               Payment Monitor
             </p>
           </div>
-          {/* Mobile close button */}
           <button
             onClick={() => setMobileOpen(false)}
             className="ml-auto lg:hidden p-2 rounded-xl hover:bg-accent/10 text-muted"
@@ -78,7 +75,8 @@ export function Sidebar({ user }: SidebarProps) {
         {navItems.map((item) => {
           if (item.adminOnly && user.role !== "ADMIN") return null;
 
-          const isActive = pathname === item.href.split("?")[0];
+          const isActive =
+            pathname === item.href && !currentTab;
 
           return (
             <Link
@@ -134,7 +132,6 @@ export function Sidebar({ user }: SidebarProps) {
 
   return (
     <>
-      {/* Mobile hamburger button */}
       <button
         onClick={() => setMobileOpen(true)}
         className="fixed top-4 left-4 z-50 lg:hidden p-2.5 rounded-xl glass border border-border"
@@ -142,7 +139,6 @@ export function Sidebar({ user }: SidebarProps) {
         <Menu className="w-5 h-5 text-foreground" />
       </button>
 
-      {/* Mobile overlay */}
       {mobileOpen && (
         <div
           className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 lg:hidden"
@@ -150,20 +146,26 @@ export function Sidebar({ user }: SidebarProps) {
         />
       )}
 
-      {/* Mobile sidebar */}
       <aside
         className={cn(
           "fixed left-0 top-0 h-screen w-72 glass-strong border-r border-border flex flex-col z-50 lg:hidden transition-transform duration-300",
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        {sidebarContent}
+        {content}
       </aside>
 
-      {/* Desktop sidebar */}
       <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-64 glass-strong border-r border-border flex-col z-50">
-        {sidebarContent}
+        {content}
       </aside>
     </>
+  );
+}
+
+export function Sidebar({ user }: SidebarProps) {
+  return (
+    <Suspense>
+      <SidebarContent user={user} />
+    </Suspense>
   );
 }
