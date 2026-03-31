@@ -55,11 +55,11 @@ export function PaymentsChart({ data }: ChartProps) {
   }));
 
   return (
-    <div className="glass rounded-2xl p-6 glow-purple">
-      <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
+    <div className="glass rounded-xl sm:rounded-2xl p-3 sm:p-6 glow-purple">
+      <h3 className="text-xs sm:text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 sm:mb-4">
         Pagos Últimos 30 Días
       </h3>
-      <div className="h-72">
+      <div className="h-48 sm:h-72">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={chartData}>
             <defs>
