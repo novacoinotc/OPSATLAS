@@ -40,7 +40,7 @@ export function PaymentFiltersBar({ filters, onFiltersChange, onApply }: Props) 
   const hasFilters = Object.values(filters).some((v) => v !== "");
 
   return (
-    <div className="glass rounded-2xl p-4 space-y-3">
+    <div className="glass rounded-xl sm:rounded-2xl p-3 sm:p-4 space-y-2 sm:space-y-3">
       {/* Main bar */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         <div className="relative flex-1">

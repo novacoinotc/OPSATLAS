@@ -139,15 +139,15 @@ function DashboardContent() {
   }
 
   return (
-    <div className="space-y-6 fade-in">
+    <div className="space-y-3 sm:space-y-6 fade-in">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
           {clabeFilter ? (
             <>
               <div className="flex items-center gap-2 mb-1">
-                <Wallet className="w-5 h-5 text-accent-light" />
-                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                <Wallet className="w-4 h-4 text-accent-light" />
+                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
                   getCompanyFromClabe(clabeFilter) === "Gamingo"
                     ? "bg-accent/15 text-accent-light"
                     : "bg-accent-blue/15 text-accent-blue-light"
@@ -155,17 +155,17 @@ function DashboardContent() {
                   {getCompanyFromClabe(clabeFilter)}
                 </span>
               </div>
-              <h1 className="text-2xl font-bold font-mono">
+              <h1 className="text-lg sm:text-2xl font-bold font-mono">
                 {formatClabe(clabeFilter)}
               </h1>
-              <p className="text-muted text-sm mt-1">
+              <p className="text-muted text-xs sm:text-sm mt-0.5">
                 Pagos recibidos en esta cuenta
               </p>
             </>
           ) : (
             <>
-              <h1 className="text-2xl font-bold">Dashboard</h1>
-              <p className="text-muted text-sm mt-1">
+              <h1 className="text-xl sm:text-2xl font-bold">Dashboard</h1>
+              <p className="text-muted text-xs sm:text-sm mt-0.5">
                 Monitoreo de pagos SPEI en tiempo real
               </p>
             </>

@@ -55,28 +55,25 @@ export function PaymentsTable({
   return (
     <div className="space-y-3">
       {/* Mobile card view */}
-      <div className="lg:hidden space-y-3">
+      <div className="lg:hidden space-y-2">
         {payments.map((payment) => (
           <div
             key={payment.id}
             onClick={() => onSelectPayment(payment)}
-            className="glass rounded-2xl p-4 cursor-pointer hover-lift active:scale-[0.98] transition-all"
+            className="glass rounded-xl p-3 cursor-pointer active:scale-[0.98] transition-all"
           >
-            <div className="flex items-start justify-between mb-3">
+            <div className="flex items-start justify-between mb-2">
               <div className="flex-1 min-w-0">
-                <p className="font-medium truncate">{payment.payerName}</p>
-                <p className="text-xs text-muted font-mono mt-0.5">
-                  {payment.payerAccount}
-                </p>
+                <p className="text-sm font-medium truncate">{payment.payerName}</p>
               </div>
-              <p className="text-lg font-bold text-accent-light ml-3">
+              <p className="text-sm font-bold text-accent-light ml-2">
                 {formatCurrency(payment.amount)}
               </p>
             </div>
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <span
-                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${
+                  className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${
                     payment.company === "Gamingo"
                       ? "bg-accent/15 text-accent-light"
                       : "bg-accent-blue/15 text-accent-blue-light"
@@ -85,12 +82,12 @@ export function PaymentsTable({
                   {payment.company}
                 </span>
                 {payment.concept && (
-                  <span className="text-xs text-muted truncate max-w-[120px]">
+                  <span className="text-[10px] text-muted truncate max-w-[100px]">
                     {payment.concept}
                   </span>
                 )}
               </div>
-              <span className="text-xs text-muted">
+              <span className="text-[10px] text-muted">
                 {formatDate(payment.receivedTimestamp)}
               </span>
             </div>
