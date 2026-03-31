@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  VIEWER
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      Role     @default(VIEWER)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Payment {
+  id                 String   @id @default(cuid())
+  trackingKey        String   @unique
+  amount             Float
+  payerName          String
+  payerAccount       String
+  beneficiaryAccount String
+  concept            String?
+  numericalReference String?
+  receivedTimestamp  DateTime
+  company            String
+  createdAt          DateTime @default(now())
+
+  @@index([beneficiaryAccount])
+  @@index([company])
+  @@index([receivedTimestamp])
+  @@index([payerName])
+  @@map("payments")
+}
